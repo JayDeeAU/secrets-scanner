@@ -1,0 +1,611 @@
+# Secrets Scanner Configuration
+# ------------------------------------------------------------
+# This configuration file defines patterns for detecting secrets and sensitive information
+# in source code. Patterns are organized by category and include metadata about severity,
+# applicable scanning modes, and example matches.
+
+metadata:
+  version: "1.0.0"
+  description: "Configuration for enhanced Python secrets scanner"
+  last_updated: "2025-05-21"
+
+# Files to include or exclude from scanning
+file_selection:
+  # Files to include in scanning - matches file patterns
+  file_patterns:
+    - "*.env"
+    - "*.env.*"
+    - ".env"
+    - ".env.*"
+    - "*.py"
+    - "*.json"
+    - "*.yaml"
+    - "*.yml"
+    - "*.ts*"
+    - "*.*js*"
+    - "*.sh*.*"
+    - "*.conf"
+    - "*rc"
+    - "*.ini"
+    - "Dockerfile*"
+    - "docker-compose*"
+    - "*.properties"
+    - "*.txt"
+    - "*.config"
+    - "*.cfg"
+    - "*.xml"
+    - "*.tf"
+    - "*.tfvars"
+    - "*.pem"
+    - "*.key"
+
+  # Configuration files that need special handling
+  config_file_patterns:
+    - ".env"
+    - "*.env"
+    - "*.env.*"
+    - "*.ini"
+    - "*.conf"
+    - "*.cfg"
+    - "*.properties"
+    - "*.tfvars"
+    - "*.yaml"
+    - "*.yml"
+    - "config.*"
+
+  # Paths to exclude from scanning
+  excluded_paths:
+    - "**/node_modules/**"
+    - "**/.git/**"
+    - "**/venv/**"
+    - "**/__pycache__/**"
+    - "**/dist/**"
+    - "**/build/**"
+    - "**/.vscode/**"
+    - "**/.idea/**"
+
+# Patterns for detecting secrets, organized by category
+# Each pattern includes:
+#   - pattern: The regex pattern
+#   - severity: HIGH, MEDIUM, or LOW
+#   - description: What the pattern detects
+#   - risk_type: Type of risk (HARDCODED_SECRET, DATA_EXPOSURE_LOGS, etc.)
+#   - example: Example of what would match
+#   - modes: Which scanning modes include this pattern
+secret_patterns:
+  # API keys, tokens, client secrets
+  api_credentials:
+    - pattern: "access[_-]?token[\"\\'=:\\s]+(?!test|example|dummy|\\$\\{)[A-Za-z0-9_.-]{10,}"
+      severity: "HIGH"
+      description: "Access token"
+      risk_type: "HARDCODED_SECRET"
+      example: "access_token=\"abc123def456ghi\""
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "auth[_-]?token[\"\\'=:\\s]+(?!test|example|dummy|\\$\\{)[A-Za-z0-9_.-]{10,}"
+      severity: "HIGH"
+      description: "Auth token"
+      risk_type: "HARDCODED_SECRET"
+      example: "auth_token=\"auth123token456\""
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "apikey[\"\\'=:\\s]+(?!test|example|dummy|\\$\\{)[A-Za-z0-9_.-]{10,}"
+      severity: "HIGH"
+      description: "API key"
+      risk_type: "HARDCODED_SECRET"
+      example: "apikey=\"api123key456\""
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "client[_-]?secret[\"\\'=:\\s]+(?!test|example|dummy|\\$\\{)[A-Za-z0-9_.-]{10,}"
+      severity: "HIGH"
+      description: "Client secret"
+      risk_type: "HARDCODED_SECRET"
+      example: "client_secret=\"client123secret456\""
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "secret[\"\\'=:\\s]+(?!test|example|dummy|placeholder|\\$\\{)[A-Za-z0-9_.-]{10,}"
+      severity: "MEDIUM"
+      description: "Secret value"
+      risk_type: "HARDCODED_SECRET"
+      example: "secret=\"secret123value456\""
+      modes: ["comprehensive"]
+
+    - pattern: "token[\"\\'=:\\s]+(?!test|example|dummy|placeholder|\\$\\{)[A-Za-z0-9_.-]{10,}"
+      severity: "MEDIUM"
+      description: "Token value"
+      risk_type: "HARDCODED_SECRET"
+      example: "token=\"token123value456\""
+      modes: ["comprehensive"]
+
+    - pattern: "client_id\\s*=\\s*[\"\\'](?!test|example|dummy|placeholder|\\$\\{)[a-zA-Z0-9._-]{20,}[\"\\']"
+      severity: "MEDIUM"
+      description: "Client ID with long value"
+      risk_type: "HARDCODED_SECRET"
+      example: "client_id = \"1234567890abcdefghij1234567890\""
+      modes: ["comprehensive"]
+
+    - pattern: "client_secret\\s*=\\s*[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+      severity: "HIGH"
+      description: "Client secret with UUID format"
+      risk_type: "HARDCODED_SECRET"
+      example: "client_secret = \"550e8400-e29b-41d4-a716-446655440000\""
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "Bearer\\s+[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+"
+      severity: "HIGH"
+      description: "JWT Bearer token"
+      risk_type: "HARDCODED_SECRET"
+      example: "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "api[_-]?key\\s*=\\s*[\"\\'](?!test|example|dummy|placeholder|\\$\\{)[a-zA-Z0-9._-]{16,}[\"\\']"
+      severity: "HIGH"
+      description: "API key with long value"
+      risk_type: "HARDCODED_SECRET"
+      example: "api_key = \"1234567890abcdefghij1234567890\""
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "access_token\\s*=\\s*[\"\\'](?!test|example|dummy|placeholder|\\$\\{)[a-zA-Z0-9._-]{16,}[\"\\']"
+      severity: "HIGH"
+      description: "Access token with long value"
+      risk_type: "HARDCODED_SECRET"
+      example: "access_token = \"1234567890abcdefghij1234567890\""
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "token\\s*=\\s*[\"''][0-9a-zA-Z._=/-]{16,}[\"'']"
+      severity: "HIGH"
+      description: "Token with long value"
+      risk_type: "HARDCODED_SECRET"
+      example: "token = \"1234567890abcdefghij1234567890\""
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "secret\\s*=\\s*[\"''][0-9a-zA-Z._=/-]{16,}[\"'']"
+      severity: "HIGH"
+      description: "Secret with long value"
+      risk_type: "HARDCODED_SECRET"
+      example: "secret = \"1234567890abcdefghij1234567890\""
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+"
+      severity: "HIGH"
+      description: "JWT Token"
+      risk_type: "HARDCODED_SECRET"
+      example: "token = \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U\""
+      modes: ["basic", "comprehensive"]
+
+  # Password patterns
+  password_credentials:
+    - pattern: "password[\"\\'=:\\s]+(?!password|test|example|123456|admin|\\$\\{)[A-Za-z0-9_.-]{8,}"
+      severity: "HIGH"
+      description: "Password with 8+ characters"
+      risk_type: "HARDCODED_SECRET"
+      example: "password=\"mypassword123\""
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "password\\s*=\\s*[\"''](?!password|test|example|123456|admin|\\$\\{)[0-9a-zA-Z._=/-]{8,}[\"'']"
+      severity: "HIGH"
+      description: "Password with quoted value"
+      risk_type: "HARDCODED_SECRET"
+      example: "password = \"secure-pwd.123\""
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "PASSWORD\\s*=\\s*(?!test|example|placeholder|password|null|\\$\\{)[^\\s$]+"
+      severity: "HIGH"
+      description: "Password environment variable"
+      risk_type: "HARDCODED_SECRET"
+      example: "PASSWORD = \"secure123\""
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "PASS\\s*=\\s*(?!test|example|placeholder|0|1|true|false|null|\\$\\{)[^\\s$]+"
+      severity: "MEDIUM"
+      description: "Pass environment variable"
+      risk_type: "HARDCODED_SECRET"
+      example: "PASS = \"secure123\""
+      modes: ["comprehensive"]
+
+    - pattern: "(?<!\\$)PWD\\s*=\\s*(?!test|example|placeholder|\\.|/|\\$\\{)[^\\s$]+"
+      severity: "MEDIUM"
+      description: "PWD environment variable (not directory)"
+      risk_type: "HARDCODED_SECRET"
+      example: "PWD = \"secure123\""
+      modes: ["comprehensive"]
+
+    - pattern: "pwd\\s*=\\s*(?!test|example|placeholder|\\.|/|\\$\\{)[^\\s$]+"
+      severity: "MEDIUM"
+      description: "pwd variable (not directory)"
+      risk_type: "HARDCODED_SECRET"
+      example: "pwd = \"secure123\""
+      modes: ["comprehensive"]
+
+    - pattern: "pass\\s*=\\s*(?!test|example|placeholder|0|1|true|false|null|callback|\\$\\{)[^\\s$]+"
+      severity: "MEDIUM"
+      description: "pass variable"
+      risk_type: "HARDCODED_SECRET"
+      example: "pass = \"secure123\""
+      modes: ["comprehensive"]
+
+  # Database connection strings and credentials
+  database_credentials:
+    - pattern: "postgres(ql)?://[^:]+:[^@]+@[^/]+"
+      severity: "HIGH"
+      description: "PostgreSQL connection string"
+      risk_type: "HARDCODED_SECRET"
+      example: "postgresql://user:password@localhost:5432/dbname"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "mysql://[^:]+:[^@]+@[^/]+"
+      severity: "HIGH"
+      description: "MySQL connection string"
+      risk_type: "HARDCODED_SECRET"
+      example: "mysql://user:password@localhost:3306/dbname"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "mongodb(\\+srv)?://[^:]+:[^@]+@[^/]+"
+      severity: "HIGH"
+      description: "MongoDB connection string"
+      risk_type: "HARDCODED_SECRET"
+      example: "mongodb://user:password@localhost:27017/dbname"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "redis://[^:]+:[^@]+@.+"
+      severity: "HIGH"
+      description: "Redis connection string"
+      risk_type: "HARDCODED_SECRET"
+      example: "redis://user:password@localhost:6379/0"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "DATABASE_URL\\s*=\\s*.+:.+@.+"
+      severity: "HIGH"
+      description: "Database URL with credentials"
+      risk_type: "HARDCODED_SECRET"
+      example: "DATABASE_URL=postgres://user:password@localhost/db"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "(POSTGRES|SQL|DB|MYSQL|MONGO)(_)?PASS(WORD)?\\s*=\\s*[^\\s$]+"
+      severity: "HIGH"
+      description: "Database password environment variable"
+      risk_type: "HARDCODED_SECRET"
+      example: "POSTGRES_PASSWORD = \"securepass\""
+      modes: ["basic", "comprehensive"]
+
+  # Service-specific credentials
+  service_specific_credentials:
+    # AWS credentials
+    - pattern: "AKIA[0-9A-Z]{16}"
+      severity: "HIGH"
+      description: "AWS access key ID"
+      risk_type: "HARDCODED_SECRET"
+      example: "AKIAIOSFODNN7EXAMPLE"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "aws.*access.*key.*=\\s*[A-Za-z0-9/+=]{20,}"
+      severity: "HIGH"
+      description: "AWS access key"
+      risk_type: "HARDCODED_SECRET"
+      example: "aws.access.key = \"AKIAIOSFODNN7EXAMPLE12345\""
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "aws.*secret.*key.*=\\s*[A-Za-z0-9/+=]{20,}"
+      severity: "HIGH"
+      description: "AWS secret key"
+      risk_type: "HARDCODED_SECRET" 
+      example: "aws.secret.key = \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\""
+      modes: ["basic", "comprehensive"]
+
+    # Stripe keys
+    - pattern: "sk_live_[0-9a-zA-Z]{24}"
+      severity: "HIGH"
+      description: "Stripe live key"
+      risk_type: "HARDCODED_SECRET"
+      example: "sk_live_1234567890abcdefghijklmn"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "rk_live_[0-9a-zA-Z]{24}"
+      severity: "HIGH"
+      description: "Stripe restricted key"
+      risk_type: "HARDCODED_SECRET"
+      example: "rk_live_1234567890abcdefghijklmn"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "sk_test_[0-9a-zA-Z]{24}"
+      severity: "MEDIUM"
+      description: "Stripe test key"
+      risk_type: "HARDCODED_SECRET"
+      example: "sk_test_1234567890abcdefghijklmn"
+      modes: ["comprehensive"]
+
+    # Google credentials
+    - pattern: "AIza[0-9A-Za-z_-]{30,}"
+      severity: "HIGH"
+      description: "Google API Key"
+      risk_type: "HARDCODED_SECRET"
+      example: "AIzaSyC2HMyCVA32Hc_jcRITidF9j8n9hHuIoko"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "ya29\\.[0-9A-Za-z_-]+"
+      severity: "HIGH"
+      description: "Google OAuth token"
+      risk_type: "HARDCODED_SECRET"
+      example: "ya29.a0AfH6SMBXbR3FPd6POtmxZHdZjHKw9v2xhL1moid7b"
+      modes: ["basic", "comprehensive"]
+
+    # GitHub tokens
+    - pattern: "gh[pousr]_[A-Za-z0-9_]{20,}"
+      severity: "HIGH"
+      description: "GitHub token"
+      risk_type: "HARDCODED_SECRET"
+      example: "ghp_1234567890abcdefghijklmnopqrstuvwxyz"
+      modes: ["basic", "comprehensive"]
+
+    # Slack tokens
+    - pattern: "xox[baprs]-[0-9a-zA-Z]{10,}"
+      severity: "HIGH"
+      description: "Slack API token"
+      risk_type: "HARDCODED_SECRET"
+      example: "xoxb-123456789012-345678901234-abcdefghijklmnopqrstuvwx"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "T[a-zA-Z0-9_]{8}/B[a-zA-Z0-9_]{8}/[a-zA-Z0-9_]{24}"
+      severity: "HIGH"
+      description: "Slack webhook"
+      risk_type: "HARDCODED_SECRET"
+      example: "T12345678/B12345678/123456789012345678901234"
+      modes: ["basic", "comprehensive"]
+
+  # Private keys and certificates
+  private_keys:
+    - pattern: "-----BEGIN.*PRIVATE KEY"
+      severity: "HIGH"
+      description: "Private key"
+      risk_type: "HARDCODED_SECRET"
+      example: "-----BEGIN RSA PRIVATE KEY-----"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "-----BEGIN.*CERTIFICATE"
+      severity: "MEDIUM"
+      description: "Certificate"
+      risk_type: "HARDCODED_SECRET"
+      example: "-----BEGIN CERTIFICATE-----"
+      modes: ["comprehensive"]
+
+# Patterns for detecting exposure of secrets
+exposure_patterns:
+  # Logging exposure patterns
+  logging_exposure:
+    - pattern: "console\\.log.*\\b(password|secret|credentials?)\\b"
+      severity: "HIGH"
+      description: "Logging password/secret"
+      risk_type: "DATA_EXPOSURE_LOGS"
+      example: "console.log(\"password:\", password)"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "console\\.log.*\\b(access_token|auth_token|api_token)\\b"
+      severity: "HIGH"
+      description: "Logging access/auth token"
+      risk_type: "DATA_EXPOSURE_LOGS"
+      example: "console.log(\"token:\", access_token)"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "console\\.log.*\\b(api_key|secret_key|private_key)\\b"
+      severity: "HIGH"
+      description: "Logging API/secret key"
+      risk_type: "DATA_EXPOSURE_LOGS"
+      example: "console.log(\"API key:\", api_key)"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "print.*\\b(password|secret|credentials?)\\b"
+      severity: "HIGH"
+      description: "Printing password/secret"
+      risk_type: "DATA_EXPOSURE_LOGS"
+      example: "print(\"Password:\", password)"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "print.*\\b(access_token|auth_token|api_token)\\b"
+      severity: "HIGH"
+      description: "Printing access/auth token"
+      risk_type: "DATA_EXPOSURE_LOGS"
+      example: "print(\"Token:\", access_token)"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "print.*\\b(api_key|secret_key|private_key)\\b"
+      severity: "HIGH"
+      description: "Printing API/secret key"
+      risk_type: "DATA_EXPOSURE_LOGS"
+      example: "print(\"API key:\", api_key)"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "echo.*\\b(password|secret|credentials?)\\b"
+      severity: "HIGH"
+      description: "Echoing password/secret"
+      risk_type: "DATA_EXPOSURE_LOGS"
+      example: "echo \"Password: $PASSWORD\""
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "echo.*\\b(access_token|auth_token|api_token)\\b"
+      severity: "HIGH"
+      description: "Echoing access/auth token"
+      risk_type: "DATA_EXPOSURE_LOGS"
+      example: "echo \"Token: $TOKEN\""
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "echo.*\\b(api_key|secret_key|private_key)\\b"
+      severity: "HIGH"
+      description: "Echoing API/secret key"
+      risk_type: "DATA_EXPOSURE_LOGS"
+      example: "echo \"API key: $API_KEY\""
+      modes: ["basic", "comprehensive"]
+
+  # Response exposure patterns
+  response_exposure:
+    - pattern: "return.*\\b(password|secret|credentials?)\\b"
+      severity: "HIGH"
+      description: "Returning password/secret"
+      risk_type: "DATA_EXPOSURE_RESPONSE"
+      example: "return { password: userPassword }"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "return.*\\b(access_token|auth_token|api_token)\\b"
+      severity: "HIGH"
+      description: "Returning access/auth token"
+      risk_type: "DATA_EXPOSURE_RESPONSE"
+      example: "return { token: userToken }"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "return.*\\b(api_key|secret_key|private_key)\\b"
+      severity: "HIGH"
+      description: "Returning API/secret key"
+      risk_type: "DATA_EXPOSURE_RESPONSE"
+      example: "return { key: apiKey }"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "res\\.send.*\\b(password|secret|credentials?)\\b"
+      severity: "HIGH"
+      description: "Sending password/secret in response"
+      risk_type: "DATA_EXPOSURE_RESPONSE"
+      example: "res.send({ password: userPassword })"
+      modes: ["basic", "comprehensive"]
+    
+    - pattern: "res\\.send.*\\b(access_token|auth_token|api_token)\\b"
+      severity: "HIGH"
+      description: "Sending access/auth token in response"
+      risk_type: "DATA_EXPOSURE_RESPONSE"
+      example: "res.send({ token: userToken })"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "res\\.send.*\\b(api_key|secret_key|private_key)\\b"
+      severity: "HIGH"
+      description: "Sending API/secret key in response"
+      risk_type: "DATA_EXPOSURE_RESPONSE"
+      example: "res.send({ key: apiKey })"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "res\\.json.*\\b(password|secret|credentials?)\\b"
+      severity: "HIGH"
+      description: "JSON response with password/secret"
+      risk_type: "DATA_EXPOSURE_RESPONSE"
+      example: "res.json({ password: userPassword })"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "res\\.json.*\\b(access_token|auth_token|api_token)\\b"
+      severity: "HIGH"
+      description: "JSON response with access/auth token"
+      risk_type: "DATA_EXPOSURE_RESPONSE"
+      example: "res.json({ token: userToken })"
+      modes: ["basic", "comprehensive"]
+
+    - pattern: "res\\.json.*\\b(api_key|secret_key|private_key)\\b"
+      severity: "HIGH"
+      description: "JSON response with API/secret key"
+      risk_type: "DATA_EXPOSURE_RESPONSE"
+      example: "res.json({ key: apiKey })"
+      modes: ["basic", "comprehensive"]
+
+  # Config section patterns
+  config_sections:
+    - pattern: "\\[(secrets?|credentials?)\\]"
+      severity: "MEDIUM"
+      description: "Secrets section in config"
+      risk_type: "SENSITIVE_CONFIG"
+      example: "[secrets]"
+      modes: ["comprehensive"]
+
+    - pattern: "\\[(api[_-]?key|api[_-]?token|api[_-]?secret).*\\]"
+      severity: "MEDIUM"
+      description: "API section in config"
+      risk_type: "SENSITIVE_CONFIG"
+      example: "[api_keys]"
+      modes: ["comprehensive"]
+
+    - pattern: "\\[(auth[_-]?token|auth[_-]?key|auth[_-]?secret).*\\]"
+      severity: "MEDIUM"
+      description: "Auth section in config"
+      risk_type: "SENSITIVE_CONFIG"
+      example: "[auth_tokens]"
+      modes: ["comprehensive"]
+
+# Patterns to filter out to reduce false positives
+filter_patterns:
+  # Patterns to ignore
+  exclusions:
+    - pattern: "console\\.log\\([\"''][^\"'']*[\"'']\\)"
+      description: "Simple string logging"
+      example: "console.log('Debug message')"
+
+    - pattern: "\\b(example|sample|mock|dummy|test|placeholder|template|default)\\b"
+      description: "Test or example code"
+      example: "example_password = '123456'"
+
+    - pattern: "\\s*//|\\s*#"
+      description: "Comments"
+      example: "// This is a comment"
+
+    - pattern: "TODO|FIXME"
+      description: "TODOs and FIXMEs"
+      example: "TODO: Add proper authentication"
+
+    - pattern: "github\\.com|localhost|127\\.0\\.1"
+      description: "Development URLs"
+      example: "https://github.com/user/repo"
+
+    - pattern: "token management|token information|token endpoints"
+      description: "Documentation about tokens"
+      example: "This API provides token management features"
+
+    - pattern: "token\\s*=\\s*\\w+\\.json"
+      description: "JSON file reference"
+      example: "token = config.json"
+
+    - pattern: "token\\s*=\\s*\\w+\\.copy"
+      description: "Variable copy"
+      example: "token = data.copy"
+
+    - pattern: "refresh_token=refresh_token"
+      description: "Parameter assignment"
+      example: "refresh_token=refresh_token"
+
+    - pattern: "0\\.0\\.0\\.0"
+      description: "Local host IP"
+      example: "http://0.0.0.0:8080"
+
+  # Patterns that are automatically allowed
+  allowlist_patterns:
+    - pattern: "password\\s*=\\s*(None|null|undefined|''|\"\"|\\${\\w+})"
+      description: "Empty/null password assignment"
+      example: "password = None"
+
+    - pattern: "secret\\s*=\\s*(None|null|undefined|''|\"\"|\\${\\w+})"
+      description: "Empty/null secret assignment"
+      example: "secret = null"
+
+    - pattern: "token\\s*=\\s*(None|null|undefined|''|\"\"|\\${\\w+})"
+      description: "Empty/null token assignment"
+      example: "token = \"\""
+
+# Scan mode configurations
+scan_modes:
+  # Basic mode (formerly "strict") - fewer patterns but higher confidence
+  basic:
+    description: "Basic scan mode detects high-confidence patterns with fewer false positives"
+    severity_filter: "HIGH"  # Only report HIGH severity in basic mode
+    pattern_groups:
+      - "api_credentials:basic"
+      - "password_credentials:basic"
+      - "database_credentials:basic"
+      - "service_specific_credentials:basic"
+      - "private_keys:basic"
+      - "logging_exposure:basic"
+      - "response_exposure:basic"
+  
+  # Comprehensive mode (formerly "loose") - more patterns, more coverage
+  comprehensive:
+    description: "Comprehensive scan mode detects all patterns for maximum coverage"
+    severity_filter: "ALL"  # Report all severities in comprehensive mode
+    pattern_groups:
+      - "api_credentials"
+      - "password_credentials"
+      - "database_credentials"
+      - "service_specific_credentials"
+      - "private_keys"
+      - "logging_exposure"
+      - "response_exposure"
+      - "config_sections"
